@@ -1,0 +1,85 @@
+[io]
+mesh_create_file = "../data/maillage/maillage_structured"
+calcul_mesh = true
+output_dir = "../data"
+vtk_output_dir = "VTK"
+convergence_output_dir = "convergence"
+output_polarization_vtk = "Polarization.vtk"
+output_convergence_polarization = "Polarization_convergence_maxchange.dat"
+
+[chrono]
+temps_calcul_maillage = true
+temps_export_maillage = true
+temps_export_vtk_p = true
+temps_global = true
+temps_validation = true
+
+[mesh]
+L_x = 1.0
+L_y = 1.0
+n_x = 100
+n_y = 100
+
+[physics]
+L = 1.0
+alpha = -1.0
+beta = 1.0 
+gamma = 1.0
+G = 0.1
+epsilon_0 = 0.131 
+epsilon_r = 1.0
+dt = 0.01
+
+enable_electrostatics = true
+enable_mecanics = true
+enable_fracture = false
+
+# Rigidité élastique (en GPa)
+C11 = 166.0
+C12 = 77.0
+C44 = 43.0
+
+# Coefficients d'électrostriction (Couplage)
+Q11 = 0.11
+Q12 = -0.043
+Q44 = 0.059
+
+[simulation]
+max_steps_P = 2000
+save_frequency_P = 100
+tolerance_P = 1e-6
+
+[validation]
+enable_validation_thermodynamique = false
+enable_validation_electrostatique = false
+
+[boundary_conditions]
+enable_dirichlet_x = false
+enable_dirichlet_y = false  
+
+dirichlet_left_value = -0.570553
+dirichlet_right_value = 0.570553
+dirichlet_top_value = 0.0
+dirichlet_bottom_value = 0.0
+
+[mechanics_bcs]
+fix_bottom_x = true
+value_bottom_x = 0.0
+fix_bottom_y = true
+value_bottom_y = 0.0
+
+fix_top_x = false
+value_top_x = 0.0
+fix_top_y = false
+value_top_y = 5.0
+
+
+fix_left_x = false
+value_left_x = 0.0
+fix_left_y = false
+value_left_y = 0.0
+
+fix_right_x = false
+value_right_x = 0.0
+fix_right_y = false
+value_right_y = 0.0

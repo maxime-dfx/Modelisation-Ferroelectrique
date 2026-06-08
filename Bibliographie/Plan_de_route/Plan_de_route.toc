@@ -1,0 +1,13 @@
+\babel@toc {french}{}\relax 
+\contentsline {section}{\numberline {1}Étude des matériaux ferroélectriques (Fondements théoriques)}{2}{section.1}%
+\contentsline {subsection}{\numberline {1.1}Origine microscopique et physique du solide}{2}{subsection.1.1}%
+\contentsline {subsection}{\numberline {1.2}Thermodynamique des transitions de phase (Modèle de Landau-Devonshire)}{2}{subsection.1.2}%
+\contentsline {subsection}{\numberline {1.3}Lois de comportement macroscopiques et non-linéarités}{2}{subsection.1.3}%
+\contentsline {section}{\numberline {2}Composites ferroélectriques (PZT + PVDF) : Approche Multi-échelle}{2}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Propriétés des phases en présence et connectivité}{2}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Homogénéisation électromécanique (Micro-Mécanique)}{3}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3}Problématique de la polarisation du composite (Polling)}{3}{subsection.2.3}%
+\contentsline {section}{\numberline {3}Propagation des fissures (Mécanique de la rupture couplée)}{3}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Mécanique de la rupture en milieu piézoélectrique linéaire}{3}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}Effet du champ électrique sur la ténacité}{3}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}Non-linéarités en pointe de fissure : Zone de basculement de domaine}{3}{subsection.3.3}%

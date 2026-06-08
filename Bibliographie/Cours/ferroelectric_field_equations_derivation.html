@@ -1,0 +1,270 @@
+
+<style>
+.wrap{font-family:var(--font-sans);font-size:14px;line-height:1.8;color:var(--color-text-primary);padding:0.5rem 0;max-width:100%}
+h1{font-size:19px;font-weight:500;margin:0 0 0.2rem}
+.sub{font-size:13px;color:var(--color-text-secondary);margin:0 0 1.5rem;padding-bottom:1rem;border-bottom:0.5px solid var(--color-border-tertiary)}
+.sec{font-size:10.5px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-text-secondary);border-top:0.5px solid var(--color-border-tertiary);padding-top:1.4rem;margin:2rem 0 0.3rem}
+h2{font-size:16px;font-weight:500;margin:0.2rem 0 0.7rem}
+h3{font-size:13.5px;font-weight:500;margin:1rem 0 0.3rem;color:var(--color-text-secondary)}
+.eq{overflow-x:auto;margin:0.75rem 0;padding:0.2rem 0}
+.rbox{background:var(--color-background-info);border:0.5px solid var(--color-border-info);border-radius:var(--border-radius-md);padding:0.85rem 1.1rem;margin:1.1rem 0;overflow-x:auto}
+.rbox .rl{font-size:10px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-text-info);margin-bottom:0.5rem}
+.step{background:var(--color-background-secondary);border-left:2px solid var(--color-border-secondary);padding:0.6rem 1rem;margin:0.6rem 0;overflow-x:auto;border-radius:0}
+.step .sl{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:0.1em;color:var(--color-text-secondary);margin-bottom:0.25rem}
+.grid{display:grid;grid-template-columns:1fr;gap:10px;margin:1rem 0}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:0.85rem 1.1rem;overflow-x:auto}
+.card .cn{font-size:10px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-text-secondary);margin-bottom:0.4rem}
+.vt{width:100%;border-collapse:collapse;font-size:13px;margin:0.6rem 0}
+.vt td{padding:5px 8px;border-bottom:0.5px solid var(--color-border-tertiary);vertical-align:top}
+.vt td:first-child{width:28%;color:var(--color-text-secondary);white-space:nowrap;font-size:12.5px}
+.vt tr:last-child td{border-bottom:none}
+.note{background:var(--color-background-secondary);border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);padding:0.65rem 1rem;font-size:13px;color:var(--color-text-secondary);margin:1rem 0}
+p{margin:0.35rem 0}
+ul{margin:0.3rem 0 0.3rem 1.3rem;font-size:13px}
+li{margin:0.2rem 0}
+.loading{padding:2rem;text-align:center;color:var(--color-text-secondary);font-size:14px}
+</style>
+
+<h2 class="sr-only">Démonstration mathématique rigoureuse des équations de champs en ferroélectricité — polarisation, électrique et phase field</h2>
+
+<div class="wrap">
+
+<h1>Ferroélectricité — Démonstration variationnelle des équations de champ</h1>
+<p class="sub">Dérivation rigoureuse des équations de Gauss, d'équilibre mécanique et de Ginzburg-Landau par principe variationnel appliqué à la fonctionnelle de Landau-Ginzburg-Devonshire (LGD)</p>
+
+<div class="sec">1 — Notation et conventions</div>
+<h2>Notation tensorielle</h2>
+<p>Convention de sommation d'Einstein sur les indices répétés \(i,j,k,\ldots \in \{1,2,3\}\). Notation de dérivée partielle : \(\partial_i = \partial/\partial x_i\) et \(f_{,i} := \partial_i f\). Le domaine \(\Omega \subset \mathbb{R}^3\) possède une frontière \(\partial\Omega\) régulière de normale extérieure unitaire \(n_i\).</p>
+
+<p><strong>Symétries des tenseurs constitutifs :</strong></p>
+<div class="eq">\[c_{ijkl} = c_{jikl} = c_{ijlk} = c_{klij}, \qquad Q_{ijkl} = Q_{jikl} = Q_{ijlk}, \qquad G_{ijkl} = G_{klij}\]</div>
+
+<div class="sec">2 — Variables d'état et cinématique</div>
+<h2>Champs primaires</h2>
+
+<table class="vt">
+  <tr><td>Déplacement</td><td>\(\mathbf{u}\) : champ mécanique vectoriel \(u_i : \Omega \to \mathbb{R}\)</td></tr>
+  <tr><td>Polarisation</td><td>\(\mathbf{P}\) : paramètre d'ordre ferroélectrique \(P_i : \Omega \to \mathbb{R}\)</td></tr>
+  <tr><td>Potentiel élec.</td><td>\(\phi\) : champ scalaire électrostatique \(\phi : \Omega \to \mathbb{R}\)</td></tr>
+</table>
+
+<h3>Relations cinématiques fondamentales</h3>
+
+<p>Tenseur de déformation (hypothèse des petites perturbations) :</p>
+<div class="eq">\[\varepsilon_{ij} = \tfrac{1}{2}(u_{i,j} + u_{j,i})\]</div>
+
+<p>Déformation propre électrostrictive (eigenstrain spontanée induite par la polarisation) :</p>
+<div class="eq">\[\varepsilon^{(0)}_{ij} = Q_{ijkl}\,P_k P_l\]</div>
+
+<p>Déformation élastique, tenseur des contraintes de Cauchy, et déplacement électrique :</p>
+<div class="eq">\[\varepsilon^{(e)}_{ij} = \varepsilon_{ij} - Q_{ijkl}\,P_k P_l, \qquad \sigma_{ij} = c_{ijkl}\,\varepsilon^{(e)}_{kl}, \qquad D_i = \varepsilon_0\kappa^b E_i + P_i\]</div>
+
+<p>De l'irrotationnalité quasi-statique \(\nabla \times \mathbf{E} = \mathbf{0}\), il existe \(\phi\) tel que \(E_i = -\phi_{,i}\), donc :</p>
+<div class="eq">\[D_i = -\varepsilon_0\kappa^b\,\phi_{,i} + P_i\]</div>
+<p>où \(\kappa^b\) est la constante diélectrique de fond (contribution ionique et électronique du réseau).</p>
+
+<div class="sec">3 — Fonctionnelle d'énergie libre</div>
+<h2>Densité de Landau-Ginzburg-Devonshire</h2>
+
+<p>La fonctionnelle de Helmholtz totale est définie sur \(\Omega\) par :</p>
+<div class="eq">\[\mathcal{F}[\mathbf{P},\,\mathbf{u},\,\phi\,] = \int_\Omega \mathcal{H}\,dV, \qquad \mathcal{H} = f_L + f_g + f_e + f_{em}\]</div>
+
+<div class="step">
+  <div class="sl">Potentiel de Landau-Devonshire — double puits</div>
+  <p>Développement polynomial de \(\mathcal{H}\) en \(\mathbf{P}\) respectant la symétrie cubique \(m\bar{3}m\) :</p>
+  <div class="eq">\[f_L = \alpha_1\!\sum_i P_i^2 + \alpha_{11}\!\sum_i P_i^4 + \alpha_{12}\!\!\sum_{i &lt; j}\!\!P_i^2 P_j^2 + \alpha_{111}\!\sum_i P_i^6 + \alpha_{112}\!\!\sum_{i\neq j}\!P_i^4 P_j^2 + \alpha_{123}P_1^2 P_2^2 P_3^2\]</div>
+  <p>Ou sous forme tensorielle compacte : \(f_L = A_{ij}P_iP_j + B_{ijkl}P_iP_jP_kP_l + C_{ijklmn}P_iP_jP_kP_lP_mP_n\)</p>
+  <p>Loi de Curie-Weiss : \(\alpha_1 = (T - T_c)/(2\varepsilon_0 C)\) avec \(T_c\) température de Curie et \(C > 0\) constante de Curie. Le double puits (\(\alpha_1 &lt; 0\)) traduit la brisure de symétrie ferroélectrique.</p>
+</div>
+
+<div class="step">
+  <div class="sl">Énergie de gradient de Ginzburg — parois de domaine</div>
+  <div class="eq">\[f_g = \tfrac{1}{2}\,G_{ijkl}\,(\partial_j P_i)\,(\partial_l P_k)\]</div>
+  <p>Pénalise les variations spatiales de \(\mathbf{P}\) : contrôle l'épaisseur et l'énergie des parois de domaine. Cas isotrope : \(G_{ijkl} = g\,\delta_{ik}\delta_{jl}\) → \(f_g = \tfrac{g}{2}|\nabla\mathbf{P}|^2\).</p>
+</div>
+
+<div class="step">
+  <div class="sl">Énergie élastique avec couplage électrostrictif</div>
+  <div class="eq">\[f_e = \tfrac{1}{2}\,c_{ijkl}\!\left(\varepsilon_{ij} - Q_{ijmn}P_mP_n\right)\!\left(\varepsilon_{kl} - Q_{klpq}P_pP_q\right)\]</div>
+</div>
+
+<div class="step">
+  <div class="sl">Enthalpie électrique — couplage champ-polarisation</div>
+  <div class="eq">\[f_{em} = -\tfrac{1}{2}\,\varepsilon_0\kappa^b E_i E_i - P_i E_i = \tfrac{\varepsilon_0\kappa^b}{2}\,\phi_{,i}\phi_{,i} + P_i\phi_{,i}\]</div>
+  <p>Obtenu en substituant \(E_i = -\phi_{,i}\). Le signe découle de la minimisation de l'enthalpie électrique.</p>
+</div>
+
+<div class="sec">4 — Équation électrostatique</div>
+<h2>Théorème I — Loi de Gauss (variation par rapport à \(\phi\))</h2>
+
+<p>Soit \(\delta\phi \in H^1_0(\Omega)\) une fonction-test admissible. La stationnarité de \(\mathcal{F}\) impose \(\delta_\phi\mathcal{F} = 0\) :</p>
+<div class="eq">\[\delta_\phi\mathcal{F} = \left.\frac{d}{d\varepsilon}\,\mathcal{F}[\mathbf{P},\mathbf{u},\phi+\varepsilon\,\delta\phi]\right|_{\varepsilon=0} = \int_\Omega \frac{\partial f_{em}}{\partial \phi_{,i}}\,\partial_i(\delta\phi)\,dV\]</div>
+
+<p>On calcule la dérivée partielle de \(f_{em}\) :</p>
+<div class="eq">\[\frac{\partial f_{em}}{\partial \phi_{,i}} = \varepsilon_0\kappa^b\phi_{,i} + P_i\]</div>
+
+<p><strong>Intégration par parties</strong> (formule de Green sur \(\Omega\)) :</p>
+<div class="eq">\[\begin{aligned}
+\delta_\phi\mathcal{F} &= \int_\Omega (\varepsilon_0\kappa^b\phi_{,i} + P_i)\,\partial_i(\delta\phi)\,dV \\
+&= -\int_\Omega \partial_i\!\left(\varepsilon_0\kappa^b\phi_{,i} + P_i\right)\delta\phi\,dV + \oint_{\partial\Omega}\!\left(\varepsilon_0\kappa^b\phi_{,i}+P_i\right)n_i\,\delta\phi\,dS
+\end{aligned}\]</div>
+
+<p>Le terme de surface s'annule car \(\delta\phi\big|_{\partial\Omega} = 0\). Par le <strong>lemme fondamental du calcul des variations</strong>, \(\delta_\phi\mathcal{F} = 0\) pour tout \(\delta\phi\) implique :</p>
+<div class="eq">\[\partial_i\underbrace{\left(\varepsilon_0\kappa^b\phi_{,i} + P_i\right)}_{=\,D_i} = 0\]</div>
+
+<div class="rbox">
+  <div class="rl">Équation I — Loi de Gauss / Équation de Poisson</div>
+  <div class="eq">\[\nabla\cdot\mathbf{D} = 0 \qquad\Longleftrightarrow\qquad \varepsilon_0\kappa^b\,\Delta\phi = \nabla\cdot\mathbf{P}\]</div>
+  <p>C'est l'équation de Poisson pour le potentiel électrostatique, avec source \(-\nabla\cdot\mathbf{P} = \rho_b\) (densité volumique de charges liées). La polarisation non uniforme génère un champ électrique dépolarisant.</p>
+</div>
+
+<div class="sec">5 — Équilibre mécanique</div>
+<h2>Théorème II — Équation de Newton (variation par rapport à \(\mathbf{u}\))</h2>
+
+<p>Soit \(\delta u_i \in H^1_0(\Omega)\). Seule \(f_e\) dépend de \(\boldsymbol{\varepsilon}\) (et donc de \(\mathbf{u}\)). On identifie d'abord le tenseur des contraintes de Cauchy :</p>
+<div class="eq">\[\sigma_{ij} := \frac{\partial f_e}{\partial \varepsilon_{ij}} = c_{ijkl}\!\left(\varepsilon_{kl} - Q_{klmn}P_mP_n\right) = c_{ijkl}\,\varepsilon^{(e)}_{kl}\]</div>
+
+<p>En utilisant \(\sigma_{ij} = \sigma_{ji}\) et la variation de la déformation \(\delta\varepsilon_{ij} = \partial_j(\delta u_i)\) :</p>
+<div class="eq">\[\delta_u\mathcal{F} = \int_\Omega \sigma_{ij}\,\delta\varepsilon_{ij}\,dV = \int_\Omega \sigma_{ij}\,\partial_j(\delta u_i)\,dV\]</div>
+
+<p><strong>Intégration par parties :</strong></p>
+<div class="eq">\[\delta_u\mathcal{F} = -\int_\Omega (\partial_j\sigma_{ij})\,\delta u_i\,dV + \underbrace{\oint_{\partial\Omega}\sigma_{ij}\,n_j\,\delta u_i\,dS}_{=\,0\;\text{(frontière fixe)}} = 0\]</div>
+
+<p>Le lemme fondamental donne :</p>
+
+<div class="rbox">
+  <div class="rl">Équation II — Équilibre mécanique de Lamé-Navier généralisé</div>
+  <div class="eq">\[\partial_j\sigma_{ij} = 0 \qquad\Longleftrightarrow\qquad \nabla\cdot\boldsymbol{\sigma} = \mathbf{0}\]</div>
+  <p>Formulation explicite avec couplage électrostrictif :</p>
+  <div class="eq">\[\partial_j\!\left[c_{ijkl}\!\left(\tfrac{1}{2}(u_{k,l}+u_{l,k}) - Q_{klmn}P_mP_n\right)\right] = 0\]</div>
+  <p>La polarisation joue le rôle d'une <em>eigenstrain de source</em> dans l'équation de Lamé-Navier. En l'absence de couplage (\(Q = 0\)), on retrouve l'élasticité linéaire classique.</p>
+</div>
+
+<div class="sec">6 — Équation de champ de phase</div>
+<h2>Théorème III — Équation de Ginzburg-Landau (dérivée variationnelle par rapport à \(\mathbf{P}\))</h2>
+
+<p>La dérivée variationnelle de \(\mathcal{F}\) par rapport à \(P_k\) s'obtient par la formule d'Euler-Lagrange fonctionnelle :</p>
+<div class="eq">\[\frac{\delta\mathcal{F}}{\delta P_k} = \frac{\partial\mathcal{H}}{\partial P_k} - \partial_j\!\left(\frac{\partial\mathcal{H}}{\partial(\partial_j P_k)}\right)\]</div>
+
+<p>On calcule chacune des quatre contributions de \(\mathcal{H}\) séparément.</p>
+
+<div class="step">
+  <div class="sl">Terme 1 — Dérivée du potentiel de Landau</div>
+  <div class="eq">\[\frac{\partial f_L}{\partial P_k} = 2\alpha_1 P_k + 4\alpha_{11}P_k^3 + 2\alpha_{12}P_k\!\!\sum_{j \neq k}\!\!P_j^2 + 6\alpha_{111}P_k^5 + \cdots\]</div>
+  <p>Notation tensorielle compacte : \(= 2A_{kj}P_j + 4B_{kjlm}P_jP_lP_m + 6C_{kjlmnp}P_jP_lP_mP_nP_p\)</p>
+</div>
+
+<div class="step">
+  <div class="sl">Terme 2 — Terme de Ginzburg (raideur des parois)</div>
+  <p>On calcule \(\dfrac{\partial f_g}{\partial(\partial_j P_k)} = G_{kjlm}\,\partial_l P_m\), d'où le terme d'Euler-Lagrange :</p>
+  <div class="eq">\[-\partial_j\!\left(\frac{\partial f_g}{\partial(\partial_j P_k)}\right) = -G_{kjlm}\,\partial_j\partial_l P_m\]</div>
+  <p>Cas isotrope : \(-g\,\nabla^2 P_k\). Ce terme diffusif stabilise les parois de domaine et impose leur épaisseur caractéristique \(\ell \sim \sqrt{g/|\alpha_1|}\).</p>
+</div>
+
+<div class="step">
+  <div class="sl">Terme 3 — Couplage élastique-électrostrictif (cœur de la démonstration)</div>
+  <p>On développe la dérivée de \(f_e = \tfrac{1}{2}c_{ijlm}\varepsilon^{(e)}_{ij}\varepsilon^{(e)}_{lm}\) :</p>
+  <div class="eq">\[\frac{\partial f_e}{\partial P_k} = c_{ijlm}\,\varepsilon^{(e)}_{ij}\cdot\frac{\partial\varepsilon^{(e)}_{lm}}{\partial P_k}\]</div>
+  <p>Or \(\dfrac{\partial\varepsilon^{(e)}_{lm}}{\partial P_k} = -\dfrac{\partial}{\partial P_k}(Q_{lmpq}P_pP_q)\). On utilise la symétrie \(Q_{lmpq} = Q_{lmqp}\) :</p>
+  <div class="eq">\[\frac{\partial}{\partial P_k}\!\left(Q_{lmpq}P_pP_q\right) = Q_{lmkq}P_q + Q_{lmpk}P_p = 2Q_{lmkq}P_q\]</div>
+  <p>En substituant et renommant les indices muets (\(ij \leftrightarrow lm\)) :</p>
+  <div class="eq">\[\frac{\partial f_e}{\partial P_k} = -2c_{ijlm}\,\varepsilon^{(e)}_{ij}\,Q_{lmkq}P_q = -2Q_{ijkl}P_l\,\sigma_{ij}\]</div>
+  <p>Ce terme représente le <em>couplage piézoélectrique inverse</em> : les contraintes mécaniques \(\sigma_{ij}\) constituent une force motrice pour la polarisation.</p>
+</div>
+
+<div class="step">
+  <div class="sl">Terme 4 — Couplage électrique (champ moteur direct)</div>
+  <div class="eq">\[\frac{\partial f_{em}}{\partial P_k} = \frac{\partial}{\partial P_k}(P_i\phi_{,i}) = \phi_{,k} = -E_k\]</div>
+  <p>Le champ électrique \(\mathbf{E}\) est la force motrice directe pour renverser ou amplifier la polarisation.</p>
+</div>
+
+<p><strong>Assemblage — dérivée variationnelle complète :</strong></p>
+<div class="eq">\[\frac{\delta\mathcal{F}}{\delta P_k} = \underbrace{\frac{\partial f_L}{\partial P_k}}_{\text{Landau}} + \underbrace{G_{kjlm}\,\partial_j\partial_l P_m}_{\text{Ginzburg}} - \underbrace{2Q_{ijkl}P_l\,\sigma_{ij}}_{\text{piézo. inverse}} - \underbrace{E_k}_{\text{champ}}\]</div>
+
+<p>L'<strong>équation de Ginzburg-Landau dépendante du temps (TDGL)</strong> postule que le paramètre d'ordre non conservé évolue dans la direction de la descente de gradient de \(\mathcal{F}\), à une vitesse gouvernée par le coefficient cinétique \(\Gamma > 0\) :</p>
+<div class="eq">\[\Gamma\frac{\partial P_k}{\partial t} = -\frac{\delta\mathcal{F}}{\delta P_k}\]</div>
+
+<div class="rbox">
+  <div class="rl">Équation III — Champ de phase / TDGL (Allen-Cahn ferroélectrique)</div>
+  <div class="eq">\[\Gamma\frac{\partial P_k}{\partial t} = -\frac{\partial f_L}{\partial P_k} + G_{kjlm}\,\partial_j\partial_l P_m + 2Q_{ijkl}P_l\,\sigma_{ij} + E_k\]</div>
+  <p>Les quatre termes du membre droit représentent respectivement : (1) la force de rappel du potentiel de Landau vers les états stables, (2) la rigidité des parois de domaine (diffusion tensorielle), (3) le couplage mécanoélectrique via l'électrostriction inverse, et (4) l'excitation par le champ électrique appliqué.</p>
+</div>
+
+<div class="sec">7 — Système couplé</div>
+<h2>Récapitulatif — Trois EDP non-linéaires fortement couplées</h2>
+
+<div class="grid">
+  <div class="card">
+    <div class="cn">Équation I — Poisson électrostatique</div>
+    <div class="eq">\[\varepsilon_0\kappa^b\,\Delta\phi = \nabla\cdot\mathbf{P}\]</div>
+  </div>
+  <div class="card">
+    <div class="cn">Équation II — Équilibre de Lamé-Navier généralisé</div>
+    <div class="eq">\[\partial_j\!\left[c_{ijkl}\!\left(\varepsilon_{kl} - Q_{klmn}P_mP_n\right)\right] = 0\]</div>
+  </div>
+  <div class="card">
+    <div class="cn">Équation III — Ginzburg-Landau (TDGL)</div>
+    <div class="eq">\[\Gamma\,\dot{P}_k = -\frac{\partial f_L}{\partial P_k} + G_{kjlm}\,P_{m,jl} + 2Q_{ijkl}P_l\,\sigma_{ij} + E_k\]</div>
+  </div>
+</div>
+
+<h3>Structure du couplage multiphysique</h3>
+<ul>
+  <li>\(\mathbf{P} \to \phi\) : la polarisation non uniforme génère des charges liées \(\rho_b = -\nabla\cdot\mathbf{P}\) (source de Poisson)</li>
+  <li>\(\mathbf{P} \to \boldsymbol{\sigma}\) : la polarisation crée l'eigenstrain \(\varepsilon^{(0)}_{ij} = Q_{ijkl}P_kP_l\) (couplage électrostrictif)</li>
+  <li>\(\boldsymbol{\sigma} \to \mathbf{P}\) : les contraintes pilotent l'évolution de \(\mathbf{P}\) via \(2Q_{ijkl}P_l\sigma_{ij}\) (piézoélectricité inverse)</li>
+  <li>\(\phi \to \mathbf{P}\) : le champ électrique \(E_k = -\phi_{,k}\) est la force motrice directe sur \(\mathbf{P}\) (effet piezoélectrique direct)</li>
+</ul>
+
+<div class="note">
+  <strong>Conditions de stabilité :</strong> Le système est bien posé si \(\Gamma > 0\), si \(c_{ijkl}\) est défini positif (stabilité mécanique), si \(G_{ijkl}\) est semi-défini positif (stabilité des parois), et si le potentiel de Landau est borné inférieurement : \(\alpha_{11} > 0\), ce qui stabilise le double puits malgré \(\alpha_1 &lt; 0\) dans la phase ferroélectrique.
+</div>
+
+<div class="sec">8 — Conditions aux limites</div>
+<h2>Conditions de bord standard</h2>
+
+<table class="vt">
+  <tr><td><strong>Mécanique</strong></td><td>\(\sigma_{ij}n_j = t_i\) (traction) ou \(u_i = \bar{u}_i\) (déplacement imposé) sur \(\partial\Omega\)</td></tr>
+  <tr><td><strong>Électrostatique</strong></td><td>\(\phi = \bar{\phi}\) (tension) ou \(D_i n_i = \sigma_f\) (charge libre de surface \(\sigma_f\))</td></tr>
+  <tr><td><strong>Champ de phase</strong></td><td>\(G_{kjlm}(\partial_l P_m)\,n_j = 0\) — condition de Neumann naturelle (paroi de domaine neutre)</td></tr>
+</table>
+
+</div>
+
+<div class="loading" id="math-loading">Rendu des équations en cours…</div>
+
+<script>
+(function(){
+  var css=document.createElement('link');
+  css.rel='stylesheet';
+  css.href='https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css';
+  document.head.appendChild(css);
+
+  function loadScript(src,cb){
+    var s=document.createElement('script');
+    s.src=src;
+    s.onload=cb;
+    s.onerror=function(){document.getElementById('math-loading').textContent='Erreur de chargement de KaTeX.';};
+    document.head.appendChild(s);
+  }
+
+  loadScript('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js',function(){
+    loadScript('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js',function(){
+      try{
+        renderMathInElement(document.body,{
+          delimiters:[
+            {left:'\\[',right:'\\]',display:true},
+            {left:'\\(',right:'\\)',display:false}
+          ],
+          throwOnError:false,
+          errorColor:'#cc0000'
+        });
+        var el=document.getElementById('math-loading');
+        if(el) el.style.display='none';
+      } catch(e){
+        document.getElementById('math-loading').textContent='Erreur KaTeX : '+e.message;
+      }
+    });
+  });
+})();
+</script>

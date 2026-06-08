@@ -1,0 +1,184 @@
+\documentclass[11pt, a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{bm}
+\usepackage{geometry}
+\usepackage{booktabs}
+\usepackage{tcolorbox}
+\geometry{margin=2.5cm}
+
+\title{\textbf{Ferroélectricité \\ Démonstration variationnelle des équations de champ}}
+\author{Note de Synthèse - Modélisation Couplée}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Dérivation rigoureuse des équations de Gauss, d'équilibre mécanique et de Ginzburg-Landau par principe variationnel appliqué à la fonctionnelle de Landau-Ginzburg-Devonshire (LGD).
+\end{abstract}
+
+\section{Notation et conventions}
+
+Convention de sommation d'Einstein sur les indices répétés $i,j,k,\ldots \in \{1,2,3\}$. Notation de dérivée partielle : $\partial_i = \partial/\partial x_i$ et $f_{,i} := \partial_i f$. Le domaine $\Omega \subset \mathbb{R}^3$ possède une frontière $\partial\Omega$ régulière de normale extérieure unitaire $n_i$.
+
+\paragraph{Symétries des tenseurs constitutifs :}
+\begin{equation*}
+c_{ijkl} = c_{jikl} = c_{ijlk} = c_{klij}, \qquad Q_{ijkl} = Q_{jikl} = Q_{ijlk}, \qquad G_{ijkl} = G_{klij}
+\end{equation*}
+
+\section{Variables d'état et cinématique}
+
+\subsection{Champs primaires}
+\begin{table}[h]
+\centering
+\begin{tabular}{ll}
+\toprule
+\textbf{Champ} & \textbf{Définition} \\
+\midrule
+Déplacement & $\mathbf{u}$ : champ mécanique vectoriel $u_i : \Omega \to \mathbb{R}$ \\
+Polarisation & $\mathbf{P}$ : paramètre d'ordre ferroélectrique $P_i : \Omega \to \mathbb{R}$ \\
+Potentiel électrique & $\phi$ : champ scalaire électrostatique $\phi : \Omega \to \mathbb{R}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Relations cinématiques fondamentales}
+
+Tenseur de déformation (hypothèse des petites perturbations) :
+\begin{equation}
+\varepsilon_{ij} = \frac{1}{2}(u_{i,j} + u_{j,i})
+\end{equation}
+
+Déformation propre électrostrictive (eigenstrain spontanée induite par la polarisation) :
+\begin{equation}
+\varepsilon^{(0)}_{ij} = Q_{ijkl}P_k P_l
+\end{equation}
+
+Déformation élastique, tenseur des contraintes de Cauchy, et déplacement électrique :
+\begin{equation}
+\varepsilon^{(e)}_{ij} = \varepsilon_{ij} - Q_{ijkl}P_k P_l, \qquad \sigma_{ij} = c_{ijkl}\varepsilon^{(e)}_{kl}, \qquad D_i = \varepsilon_0\kappa^b E_i + P_i
+\end{equation}
+
+De l'irrotationnalité quasi-statique $\nabla \times \mathbf{E} = \mathbf{0}$, il existe $\phi$ tel que $E_i = -\phi_{,i}$, d'où :
+\begin{equation}
+D_i = -\varepsilon_0\kappa^b\phi_{,i} + P_i
+\end{equation}
+où $\kappa^b$ est la constante diélectrique de fond (contribution ionique et électronique du réseau).
+
+\section{Fonctionnelle d'énergie libre}
+
+La fonctionnelle de Helmholtz totale est définie sur $\Omega$ par :
+\begin{equation}
+\mathcal{F}[\mathbf{P},\mathbf{u},\phi] = \int_\Omega \mathcal{H} \, dV, \qquad \mathcal{H} = f_L + f_g + f_e + f_{em}
+\end{equation}
+
+\paragraph{Potentiel de Landau-Devonshire (double puits) :}
+Développement polynomial de $\mathcal{H}$ en $\mathbf{P}$ respectant la symétrie cubique $m\bar{3}m$ :
+\begin{equation}
+f_L = \alpha_1\sum_i P_i^2 + \alpha_{11}\sum_i P_i^4 + \alpha_{12}\sum_{i < j}P_i^2 P_j^2 + \alpha_{111}\sum_i P_i^6 + \alpha_{112}\sum_{i\neq j}P_i^4 P_j^2 + \alpha_{123}P_1^2 P_2^2 P_3^2
+\end{equation}
+Ou sous forme tensorielle compacte : $f_L = A_{ij}P_iP_j + B_{ijkl}P_iP_jP_kP_l + C_{ijklmn}P_iP_jP_kP_lP_mP_n$. \\
+Loi de Curie-Weiss : $\alpha_1 = (T - T_c)/(2\varepsilon_0 C)$ avec $T_c$ température de Curie et $C > 0$. Le double puits ($\alpha_1 < 0$) traduit la brisure de symétrie ferroélectrique.
+
+\paragraph{Énergie de gradient de Ginzburg (parois de domaine) :}
+\begin{equation}
+f_g = \frac{1}{2} G_{ijkl} (\partial_j P_i) (\partial_l P_k)
+\end{equation}
+Pénalise les variations spatiales de $\mathbf{P}$ : contrôle l'épaisseur et l'énergie des parois de domaine. Cas isotrope : $G_{ijkl} = g\delta_{ik}\delta_{jl} \implies f_g = \frac{g}{2}|\nabla\mathbf{P}|^2$.
+
+\paragraph{Énergie élastique avec couplage électrostrictif :}
+\begin{equation}
+f_e = \frac{1}{2} c_{ijkl} \left(\varepsilon_{ij} - Q_{ijmn}P_mP_n\right) \left(\varepsilon_{kl} - Q_{klpq}P_pP_q\right)
+\end{equation}
+
+\paragraph{Enthalpie électrique (couplage champ-polarisation) :}
+\begin{equation}
+f_{em} = -\frac{1}{2}\varepsilon_0\kappa^b E_i E_i - P_i E_i = \frac{\varepsilon_0\kappa^b}{2}\phi_{,i}\phi_{,i} + P_i\phi_{,i}
+\end{equation}
+
+\section{Équation électrostatique (Théorème I - Loi de Gauss)}
+
+Soit $\delta\phi \in H^1_0(\Omega)$ une fonction-test admissible. La stationnarité de $\mathcal{F}$ impose $\delta_\phi\mathcal{F} = 0$ :
+\begin{equation}
+\delta_\phi\mathcal{F} = \left.\frac{d}{d\varepsilon}\mathcal{F}[\mathbf{P},\mathbf{u},\phi+\varepsilon\delta\phi]\right|_{\varepsilon=0} = \int_\Omega \frac{\partial f_{em}}{\partial \phi_{,i}} \partial_i(\delta\phi) \, dV
+\end{equation}
+Avec $\frac{\partial f_{em}}{\partial \phi_{,i}} = \varepsilon_0\kappa^b\phi_{,i} + P_i$. L'intégration par parties donne :
+\begin{equation}
+\delta_\phi\mathcal{F} = -\int_\Omega \partial_i \left(\varepsilon_0\kappa^b\phi_{,i} + P_i\right)\delta\phi \, dV + \oint_{\partial\Omega} \left(\varepsilon_0\kappa^b\phi_{,i}+P_i\right)n_i \delta\phi \, dS
+\end{equation}
+Le terme de surface s'annule car $\delta\phi\big|_{\partial\Omega} = 0$. Par le lemme fondamental du calcul des variations :
+
+\begin{tcolorbox}[title=Équation I — Loi de Gauss / Équation de Poisson]
+\begin{equation}
+\nabla\cdot\mathbf{D} = 0 \qquad\Longleftrightarrow\qquad \varepsilon_0\kappa^b\Delta\phi = \nabla\cdot\mathbf{P}
+\end{equation}
+\end{tcolorbox}
+
+\section{Équilibre mécanique (Théorème II - Équation de Newton)}
+
+Soit $\delta u_i \in H^1_0(\Omega)$. On identifie d'abord le tenseur des contraintes :
+\begin{equation}
+\sigma_{ij} := \frac{\partial f_e}{\partial \varepsilon_{ij}} = c_{ijkl}\left(\varepsilon_{kl} - Q_{klmn}P_mP_n\right) = c_{ijkl}\varepsilon^{(e)}_{kl}
+\end{equation}
+\begin{equation}
+\delta_u\mathcal{F} = \int_\Omega \sigma_{ij}\delta\varepsilon_{ij} \, dV = -\int_\Omega (\partial_j\sigma_{ij})\delta u_i \, dV + \oint_{\partial\Omega}\sigma_{ij}n_j\delta u_i \, dS = 0
+\end{equation}
+Ce qui donne l'équation d'équilibre local :
+
+\begin{tcolorbox}[title=Équation II — Équilibre mécanique de Lamé-Navier généralisé]
+\begin{equation}
+\partial_j\sigma_{ij} = 0 \qquad\Longleftrightarrow\qquad \nabla\cdot\boldsymbol{\sigma} = \mathbf{0}
+\end{equation}
+\end{tcolorbox}
+
+\section{Équation de champ de phase (Théorème III - Équation de Ginzburg-Landau)}
+
+La dérivée variationnelle de $\mathcal{F}$ par rapport à $P_k$ s'écrit :
+\begin{equation}
+\frac{\delta\mathcal{F}}{\delta P_k} = \frac{\partial\mathcal{H}}{\partial P_k} - \partial_j\left(\frac{\partial\mathcal{H}}{\partial(\partial_j P_k)}\right)
+\end{equation}
+Calcul des contributions :
+\begin{align}
+\text{Landau :} &\quad \frac{\partial f_L}{\partial P_k} = 2A_{kj}P_j + 4B_{kjlm}P_jP_lP_m + 6C_{kjlmnp}P_jP_lP_mP_nP_p \\
+\text{Ginzburg :} &\quad -\partial_j\left(\frac{\partial f_g}{\partial(\partial_j P_k)}\right) = -G_{kjlm}\partial_j\partial_l P_m \\
+\text{Piézo inverse :} &\quad \frac{\partial f_e}{\partial P_k} = -2c_{ijlm}\varepsilon^{(e)}_{ij}Q_{lmkq}P_q = -2Q_{ijkl}P_l\sigma_{ij} \\
+\text{Électrique :} &\quad \frac{\partial f_{em}}{\partial P_k} = \phi_{,k} = -E_k
+\end{align}
+L'équation de Ginzburg-Landau dépendante du temps (TDGL) postule $\Gamma\frac{\partial P_k}{\partial t} = -\frac{\delta\mathcal{F}}{\delta P_k}$ :
+
+\begin{tcolorbox}[title=Équation III — Champ de phase / TDGL (Allen-Cahn ferroélectrique)]
+\begin{equation}
+\Gamma\frac{\partial P_k}{\partial t} = -\frac{\partial f_L}{\partial P_k} + G_{kjlm}\partial_j\partial_l P_m + 2Q_{ijkl}P_l\sigma_{ij} + E_k
+\end{equation}
+\end{tcolorbox}
+
+\section{Système couplé et Conditions aux limites}
+
+Le système repose sur la résolution simultanée de trois EDP non-linéaires fortement couplées :
+\begin{align}
+\varepsilon_0\kappa^b\Delta\phi &= \nabla\cdot\mathbf{P} \\
+\partial_j\left[c_{ijkl}\left(\varepsilon_{kl} - Q_{klmn}P_mP_n\right)\right] &= 0 \\
+\Gamma\dot{P}_k &= -\frac{\partial f_L}{\partial P_k} + G_{kjlm}P_{m,jl} + 2Q_{ijkl}P_l\sigma_{ij} + E_k
+\end{align}
+
+\paragraph{Conditions de bord standard :}
+\begin{table}[h]
+\centering
+\begin{tabular}{lp{10cm}}
+\toprule
+\textbf{Champ} & \textbf{Condition sur $\partial\Omega$} \\
+\midrule
+Mécanique & $\sigma_{ij}n_j = t_i$ (traction) ou $u_i = \bar{u}_i$ (déplacement imposé) \\
+Électrostatique & $\phi = \bar{\phi}$ (tension) ou $D_i n_i = \sigma_f$ (charge libre de surface) \\
+Champ de phase & $G_{kjlm}(\partial_l P_m)n_j = 0$ (condition de Neumann naturelle, paroi neutre) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\end{document}

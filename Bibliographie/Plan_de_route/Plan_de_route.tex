@@ -1,0 +1,108 @@
+\documentclass[12pt,a4paper]{article}
+
+% Packages essentiels
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{geometry}
+\usepackage{hyperref}
+
+% Configuration de la page
+\geometry{a4paper, margin=2.5cm}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+}
+
+% En-tête du document
+\title{\textbf{Plan de Recherche :}\\ Étude des matériaux ferroélectriques, composites PZT/PVDF et propagation de fissures}
+\author{Maxime Defaux \\ ENSEIRB-MATMECA}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+\newpage
+
+\section{Étude des matériaux ferroélectriques (Fondements théoriques)}
+
+Cette section établit le cadre thermodynamique et cristallographique rigoureux à l'échelle du monocristal et du polycristal homogène.
+
+\subsection{Origine microscopique et physique du solide}
+\begin{itemize}
+    \item Structure cristalline des pérovskites (cas du $\text{BaTiO}_3$ ou du PZT en phase tétragonale/rhomboédrique).
+    \item Brisure de symétrie, déplacement ionique et apparition du dipôle permanent.
+    \item Notion de domaines ferroélectriques (parois à $90^\circ$ et $180^\circ$) et minimisation de l'énergie de gradient.
+\end{itemize}
+
+\subsection{Thermodynamique des transitions de phase (Modèle de Landau-Devonshire)}
+\begin{itemize}
+    \item Expression de l'énergie libre de Gibbs locale en 3D en fonction du vecteur polarisation $P_i$ et du tenseur des contraintes $\sigma_{ij}$. Le développement polynomial s'exprime sous la forme :
+    $$G(P, T) = G_0 + \frac{1}{2}\alpha(T - T_c)P^2 + \frac{1}{4}\beta P^4 + \frac{1}{6}\gamma P^6 - EP$$
+    \item Intégration du couplage électromécanique d'ordre supérieur (électrostriction $Q_{ijkl}P_iP_j\sigma_{kl}$).
+    \item Analyse des puits de potentiel et prédiction de la polarisation spontanée $P_s$.
+\end{itemize}
+
+\subsection{Lois de comportement macroscopiques et non-linéarités}
+\begin{itemize}
+    \item Équations constitutives du comportement piézoélectrique linéaire :
+    $$\sigma_{ij} = C_{ijkl} \varepsilon_{kl} - e_{kij} E_k$$
+    $$D_i = e_{ikl} \varepsilon_{kl} + \epsilon_{ij}^S E_j$$
+    \item Modélisation de la saturation, du cycle d'hystérésis et de la déformation en papillon.
+    \item Formulation des critères de basculement de domaine via la thermodynamique des processus irréversibles.
+\end{itemize}
+
+\section{Composites ferroélectriques (PZT + PVDF) : Approche Multi-échelle}
+
+Étude de l'association d'une céramique ferroélectrique rigide (PZT) avec un polymère ferroélectrique souple (PVDF) en connectivité 0-3.
+
+\subsection{Propriétés des phases en présence et connectivité}
+\begin{itemize}
+    \item Propriétés intrinsèques du PZT (rigidité, $d_{33}$ élevé, forte permittivité).
+    \item Propriétés intrinsèques du PVDF (faible rigidité, grande déformabilité, faible permittivité).
+\end{itemize}
+
+\subsection{Homogénéisation électromécanique (Micro-Mécanique)}
+\begin{itemize}
+    \item Formulation du problème de localisation pour les milieux couplés piézoélectriques.
+    \item Application des modèles analytiques (Mori-Tanaka adapté, inclusion d'Eshelby couplée).
+    \item Détermination des tenseurs effectifs $C_{ijkl}^*$, $e_{kij}^*$ et $\epsilon_{ij}^*$ en fonction de la fraction volumique de PZT.
+\end{itemize}
+
+\subsection{Problématique de la polarisation du composite (Polling)}
+\begin{itemize}
+    \item Analyse du saut de permittivité entre les deux phases.
+    \item Modélisation du phénomène de blindage du champ électrique au sein de la matrice PVDF.
+\end{itemize}
+
+\section{Propagation des fissures (Mécanique de la rupture couplée)}
+
+Analyse de la durabilité et de la rupture exacerbée par les concentrations de champs électromécaniques.
+
+\subsection{Mécanique de la rupture en milieu piézoélectrique linéaire}
+\begin{itemize}
+    \item Définition des facteurs d'intensité de contraintes ($K_I, K_{II}$) et de déplacement électrique ($K_D$).
+    \item Calcul du taux de restitution d'énergie via l'extension de l'intégrale $J$ aux milieux couplés :
+    $$J = \int_{\Gamma} \left( W n_1 - t_i \frac{\partial u_i}{\partial x_1} - q \frac{\partial \phi}{\partial x_1} \right) d\Gamma$$
+\end{itemize}
+
+\subsection{Effet du champ électrique sur la ténacité}
+\begin{itemize}
+    \item Asymétrie de la rupture selon l'orientation du champ appliqué.
+    \item Explication mécanique de l'ouverture ou de la fermeture induite par l'effet piézoélectrique.
+\end{itemize}
+
+\subsection{Non-linéarités en pointe de fissure : Zone de basculement de domaine}
+\begin{itemize}
+    \item Modélisation de la zone de concentration (\textit{process zone}) provoquant un basculement local.
+    \item Effet de blindage ou d'amplification de la fissure (plasticité de transformation).
+    \item Stratégie de modélisation numérique (XFEM ou \textit{Phase-Field}) pour le suivi de fissure dans la microstructure.
+\end{itemize}
+
+\end{document}
