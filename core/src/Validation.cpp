@@ -9,7 +9,10 @@
 #define M_PI 3.14159265358979323846
 #endif
 
-void Validation::validation_thermodynamique(const Datafile& datafile, const Mesh& msh, PhaseFieldFerro& physics, ResultsExporter& exporter) {
+Validation::Validation(const Datafile& datafile, const Mesh& msh, PhaseFieldFerro& physics, ResultsExporter& exporter)
+    : datafile(datafile), msh(msh), physics(physics), exporter(exporter) {}
+
+void Validation::validation_thermodynamique() {
     Logger::info("Demarrage de la validation thermodynamique (Norme L2)...");
     
     std::vector<Node> nodes = msh.Mesh_points();
@@ -82,7 +85,7 @@ void Validation::validation_thermodynamique(const Datafile& datafile, const Mesh
     Logger::info("Profil 1D exporte vers : " + export_path);
 }
 
-void Validation::validation_electrostatique(const Datafile& datafile, const Mesh& msh, PhaseFieldFerro& physics, ResultsExporter& exporter) {
+void Validation::validation_electrostatique() {
     Logger::info("Demarrage de la validation electrostatique (MMS)...");
     
     std::vector<Node> nodes = msh.Mesh_points();
@@ -154,7 +157,74 @@ void Validation::validation_electrostatique(const Datafile& datafile, const Mesh
     Logger::info("Profil Electrostatique exporte vers : " + export_path);
 }
 
-void Validation::validation_fracture(const Datafile& datafile, const Mesh& msh, const PhaseFieldFerro& physics, ResultsExporter& exporter) {
+void Validation::validation_mecanique() {
+    Logger::info("Demarrage de la validation mecanique (Traction uniaxiale)...");
+    
+    std::vector<Node> nodes = msh.Mesh_points();
+    const std::vector<double>& ux_num = physics.get_ux();
+    const std::vector<double>& uy_num = physics.get_uy();
+
+    // 1. Paramètres physiques et géométriques
+    double Ly = msh.get_Ly();
+    double u_top = datafile.get_bc_value_top_y();
+    double eps_yy = u_top / Ly;
+
+    double C11 = datafile.get_C11();
+    double C12 = datafile.get_C12();
+
+    // Effet Poisson pour le déplacement en X
+    double nu_eff = (C11 != 0.0) ? (C12 / C11) : 0.0;
+    double eps_xx = -nu_eff * eps_yy;
+
+    // 2. Calcul des erreurs
+    double L2_error_u = 0.0;
+    double L2_norm_exact = 0.0;
+
+    std::vector<double> vec_y;
+    std::vector<double> vec_uy_exact;
+    std::vector<double> vec_uy_num;
+    std::vector<double> vec_diff;
+
+    size_t nx = static_cast<size_t>(msh.get_nx());
+    size_t col_center = nx / 2; 
+
+    for (size_t idx = 0; idx < nodes.size(); ++idx) {
+        double x = nodes[idx].x;
+        double y = nodes[idx].y;
+
+        // Solution analytique
+        double uy_exact = eps_yy * y;
+        double ux_exact = eps_xx * x;
+
+        double diff_x = ux_exact - ux_num[idx];
+        double diff_y = uy_exact - uy_num[idx];
+
+        // Intégration L2
+        L2_error_u += (diff_x * diff_x + diff_y * diff_y) * msh.get_dx() * msh.get_dy();
+        L2_norm_exact += (ux_exact * ux_exact + uy_exact * uy_exact) * msh.get_dx() * msh.get_dy();
+
+        // Enregistrement du profil vertical
+        if (idx % nx == col_center) {
+            vec_y.push_back(y);
+            vec_uy_exact.push_back(uy_exact);
+            vec_uy_num.push_back(uy_num[idx]);
+            vec_diff.push_back(diff_y);
+        }
+    }
+
+    double relative_error = (L2_norm_exact > 1e-14) ? std::sqrt(L2_error_u) / std::sqrt(L2_norm_exact) : std::sqrt(L2_error_u);
+    Logger::info("Erreur relative L2 globale (Deplacements) : " + std::to_string(relative_error));
+
+    // 3. Exportation des données pour tracé Python/Gnuplot
+    std::vector<std::string> column_names = {"y", "uy_exact", "uy_num", "Erreur_locale"};
+    std::vector<std::vector<double>> data_columns = {vec_y, vec_uy_exact, vec_uy_num, vec_diff};
+    
+    std::string export_path = "../data/validation_mecanique/meca_convergence.dat";
+    exporter.exportConvergenceData(export_path, column_names, data_columns);
+    Logger::info("Profil Mecanique 1D exporte vers : " + export_path);
+}
+
+void Validation::validation_fracture() {
     Logger::info("Demarrage de la validation fracture (Miehe/AT2)...");
     
     /* ATTENTE DE L'IMPLEMENTATION DE LA MECANIQUE DE RUPTURE
@@ -178,14 +248,22 @@ void Validation::validation_fracture(const Datafile& datafile, const Mesh& msh, 
     */
 }
 
-void Validation::run_all_validations(Datafile datafile, const Mesh& msh, PhaseFieldFerro& physics, ResultsExporter& exporter) {
+void Validation::run_all_validations() {
+    Logger::info("Lancement de toutes les validations...");
+    Logger::info("Validation Thermodynamique : " + std::string(datafile.enable_validation_thermo() ? "ON" : "OFF"));
+    Logger::info("Validation Electrostatique : " + std::string(datafile.enable_validation_electrostatique() ? "ON" : "OFF"));
+    Logger::info("Validation Mecanique : " + std::string(datafile.enable_validation_mecanique() ? "ON" : "OFF"));
+    Logger::info("Validation Fracture : " + std::string(datafile.enable_validation_fracture() ? "ON" : "OFF"));
     if (datafile.enable_validation_thermo() == true) {
-        validation_thermodynamique(datafile, msh, physics, exporter);
+        validation_thermodynamique();
     }
     if (datafile.enable_validation_electrostatique() == true) {
-        validation_electrostatique(datafile, msh, physics, exporter );
+        validation_electrostatique();
+    }
+    if (datafile.enable_validation_mecanique() == true) {
+        validation_mecanique();
     }
     if (datafile.enable_validation_fracture() == true) {
-        validation_fracture(datafile, msh, physics, exporter);
+        validation_fracture();
     }
 }

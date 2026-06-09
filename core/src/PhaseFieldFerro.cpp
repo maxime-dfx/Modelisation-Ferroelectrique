@@ -10,8 +10,7 @@
 //  Helpers conditions aux limites — polarisation
 // ============================================================
 
-// Renvoie true si le nœud (i,j) est soumis à une CL Dirichlet
-// (utilisé à la fois dans build_imex_matrix et update_polarization)
+
 static bool is_pol_dirichlet(bool dirichlet_x, bool dirichlet_y,
                               int i, int j, int nx, int ny)
 {
@@ -20,9 +19,7 @@ static bool is_pol_dirichlet(bool dirichlet_x, bool dirichlet_y,
     return false;
 }
 
-// Renvoie la valeur imposée de Px sur le bord.
-// Convention physique : Px = 0 sur tous les bords (paroi 180° transversale).
-// Exposé ici pour faciliter une extension future (paramètre datafile).
+
 static double bc_value_px(bool /*dirichlet_x*/, bool /*dirichlet_y*/,
                            int /*i*/, int /*j*/, int /*nx*/, int /*ny*/,
                            double /*left*/, double /*right*/,
@@ -31,8 +28,6 @@ static double bc_value_px(bool /*dirichlet_x*/, bool /*dirichlet_y*/,
     return 0.0;
 }
 
-// Renvoie la valeur imposée de Py sur le bord.
-// Priorité : bords X (gauche/droite) > bords Y (haut/bas) > coins partagés.
 static double bc_value_py(bool dirichlet_x, bool dirichlet_y,
                            int i, int j, int nx, int ny,
                            double left, double right,
@@ -55,14 +50,11 @@ static double bc_value_py(bool dirichlet_x, bool dirichlet_y,
 //  Helpers conditions aux limites — mécanique
 // ============================================================
 
-// Un bord = deux composantes (x, y), chacune avec un flag et une valeur imposée.
 struct EdgeBC {
     bool   x_fixed = false; double x_value = 0.0;
     bool   y_fixed = false; double y_value = 0.0;
 };
 
-// Remplit bc_ux / bc_uy à partir des EdgeBC de chaque bord.
-// Centralise toute la logique en un seul endroit.
 static void fill_mechanical_bcs(std::vector<DofConstraint>& bc_ux,
                                  std::vector<DofConstraint>& bc_uy,
                                  int nx, int ny,
@@ -127,9 +119,10 @@ PhaseFieldFerro::PhaseFieldFerro(const Datafile& datafile, const Mesh& mesh) : m
     A_laplacian.resize(N_nodes, N_nodes);
     A_imex.resize(N_nodes, N_nodes);
 
+    m_enable_thermodynamics = datafile.enable_thermodynamics();
     m_enable_electrostatics = datafile.enable_electrostatics();
-    m_enable_mecanics = datafile.enable_mecanics(); // Par défaut, on désactive la contribution mécanique
-    m_enable_fracture = datafile.enable_fracture(); // Par défaut, on désactive la fracture
+    m_enable_mecanics = datafile.enable_mecanics(); 
+    m_enable_fracture = datafile.enable_fracture(); 
 
     m_dirichlet_x = datafile.enable_dirichlet_x();
     m_dirichlet_y = datafile.enable_dirichlet_y();
@@ -169,6 +162,17 @@ PhaseFieldFerro::PhaseFieldFerro(const Datafile& datafile, const Mesh& mesh) : m
     U_global.resize(N_dof);
     K_global.resize(N_dof, N_dof);
 
+    fix_bottom = datafile.get_fix_bottom_phi();
+    fix_top    = datafile.get_fix_top_phi();
+    fix_left   = datafile.get_fix_left_phi();
+    fix_right  = datafile.get_fix_right_phi();   
+
+    val_bottom = fix_bottom ? datafile.get_bc_value_bottom_phi() : 0.0;
+    val_top    = fix_top    ? datafile.get_bc_value_top_phi()    : 0.0;
+    val_left   = fix_left   ? datafile.get_bc_value_left_phi()   : 0.0;
+    val_right  = fix_right  ? datafile.get_bc_value_right_phi()  : 0.0;
+
+
     bottom_x_fixed = datafile.get_fix_bottom_x();
     bottom_y_fixed = datafile.get_fix_bottom_y();
     top_x_fixed    = datafile.get_fix_top_x();
@@ -190,19 +194,32 @@ PhaseFieldFerro::PhaseFieldFerro(const Datafile& datafile, const Mesh& mesh) : m
 
 
 
-    if (datafile.enable_validation_thermo() == true) {
-        initialize_position_thermodynamique_validation();
+    // ==========================================
+    // Initialisation conditionnelle de la physique
+    // ==========================================
+    if (m_enable_thermodynamics) {
+        if (datafile.enable_validation_thermo() == true) {
+            initialize_position_thermodynamique_validation();
+        } else {
+            initialize_position(); 
+        }
     } else {
-        initialize_position(); // Bruit aléatoire par défaut
+        std::fill(Px.begin(), Px.end(), 0.0);
+        std::fill(Py.begin(), Py.end(), 0.0);
     }
 
+    Logger::info("Initialisation de la physique termodynamique : " + std::string(m_enable_thermodynamics ? "ON" : "OFF"));
+    Logger::info("Initialisation de la physique electrostatique : " + std::string(m_enable_electrostatics ? "ON" : "OFF"));
+    Logger::info("Initialisation de la physique mecanique : " + std::string(m_enable_mecanics ? "ON" : "OFF"));
+    Logger::info("Initialisation de la physique fracture : " + std::string(m_enable_fracture ? "ON" : "OFF"));
+
+    init_electrostatics_bcs();
     init_mechanical_bcs();
     if (m_enable_mecanics) build_mechanics_matrix();  
-    build_poisson_matrix();
-    build_imex_matrix();
+    if (m_enable_electrostatics) build_poisson_matrix();
+    if (m_enable_thermodynamics) build_imex_matrix();
 }
 
-// La fonction d'initialisation
 void PhaseFieldFerro::initialize_position() {
     std::srand(static_cast<unsigned int>(std::time(nullptr)));
     for (size_t i = 0; i < Px.size(); ++i) {
@@ -224,15 +241,15 @@ void PhaseFieldFerro::build_poisson_matrix() {
             int idx = j * nx + i;
             double diag = 0.0; 
 
-            // Laplacien (Circuit ouvert naturel sur les bords)
             if (i > 0)      { triplets.push_back(Eigen::Triplet<double>(idx, idx - 1, -inv_dx2)); diag += inv_dx2; }
             if (i < nx - 1) { triplets.push_back(Eigen::Triplet<double>(idx, idx + 1, -inv_dx2)); diag += inv_dx2; }
             if (j > 0)      { triplets.push_back(Eigen::Triplet<double>(idx, idx - nx, -inv_dy2)); diag += inv_dy2; }
             if (j < ny - 1) { triplets.push_back(Eigen::Triplet<double>(idx, idx + nx, -inv_dy2)); diag += inv_dy2; }
 
-            // 🚨 Point de masse unique (Ancrage) pour la stabilité mathématique
-            if (i == 0 && j == 0) {
-                diag += 1e12; 
+            for (int i = 0; i < nx * ny; ++i) {
+                if (bc_phi[i].is_fixed) {
+                    triplets.push_back(Eigen::Triplet<double>(i, i, 1e30));
+                }
             }
 
             triplets.push_back(Eigen::Triplet<double>(idx, idx, diag));
@@ -277,6 +294,7 @@ void PhaseFieldFerro::build_imex_matrix() {
 }
 
 void PhaseFieldFerro::solve_electrostatics() {
+
     for (int j = 0; j < ny; ++j) {
         for (int i = 0; i < nx; ++i) {
             int idx = j * nx + i;
@@ -299,7 +317,11 @@ void PhaseFieldFerro::solve_electrostatics() {
             // 3. Remplissage du second membre pour le solveur de Poisson
             b_charges[idx] = total_charge / (epsilon_0 * epsilon_r); 
             
-            if (i == 0 && j == 0) b_charges[idx] = 0.0;
+            for (int i = 0; i < nx * ny; ++i) {
+                if (bc_phi[i].is_fixed) {
+                    b_charges[i] = bc_phi[i].value * 1e30;
+                }
+            }
         }
     }
     
@@ -307,6 +329,29 @@ void PhaseFieldFerro::solve_electrostatics() {
     if (poisson_solver.info() != Eigen::Success) { 
         Logger::error("Echec resolution Poisson"); 
         exit(1); 
+    }
+}
+
+void PhaseFieldFerro::init_electrostatics_bcs() {
+    bc_phi.assign(nx * ny, {false, 0.0});
+
+    // Bord bas et haut
+    for (int i = 0; i < nx; ++i) {
+        if (fix_bottom) { bc_phi[i].is_fixed = true; bc_phi[i].value = val_bottom; }
+        if (fix_top)    { bc_phi[(ny - 1) * nx + i].is_fixed = true; bc_phi[(ny - 1) * nx + i].value = val_top; }
+    }
+    // Bord gauche et droit
+    for (int j = 0; j < ny; ++j) {
+        if (fix_left)  { bc_phi[j * nx].is_fixed = true; bc_phi[j * nx].value = val_left; }
+        if (fix_right) { bc_phi[j * nx + nx - 1].is_fixed = true; bc_phi[j * nx + nx - 1].value = val_right; }
+    }
+
+    // Sécurité mathématique absolue : si l'utilisateur ne fixe AUCUN potentiel,
+    bool has_dirichlet = false;
+    for (const auto& bc : bc_phi) { if (bc.is_fixed) has_dirichlet = true; }
+    if (!has_dirichlet) {
+        bc_phi[0].is_fixed = true;
+        bc_phi[0].value = 0.0;
     }
 }
 
@@ -388,8 +433,8 @@ void PhaseFieldFerro::build_mechanics_matrix() {
     }
 
     for (int i = 0; i < nx * ny; ++i) {
-        if (bc_ux[i].is_fixed) triplets.push_back(Eigen::Triplet<double>(2*i,   2*i,   1e12));
-        if (bc_uy[i].is_fixed) triplets.push_back(Eigen::Triplet<double>(2*i+1, 2*i+1, 1e12));
+        if (bc_ux[i].is_fixed) triplets.push_back(Eigen::Triplet<double>(2*i,   2*i,   1e30));
+        if (bc_uy[i].is_fixed) triplets.push_back(Eigen::Triplet<double>(2*i+1, 2*i+1, 1e30));
     }
 
     K_global.setFromTriplets(triplets.begin(), triplets.end());
@@ -398,27 +443,37 @@ void PhaseFieldFerro::build_mechanics_matrix() {
 }
 
 void PhaseFieldFerro::solve_mechanics() {
-    // 1. Remise à zéro à chaque pas de temps
+    // 1. Remise à zéro du vecteur force à chaque pas de temps
     F_global.setZero(); 
 
+    // 2. Initialisation de la matrice de rigidité D
     Eigen::Matrix<double, 3, 3> D = Eigen::Matrix<double, 3, 3>::Zero();
-    D(0, 0) = C11; D(0, 1) = C12; D(1, 0) = C12; D(1, 1) = C11; D(2, 2) = C44;
+    D(0, 0) = C11; D(0, 1) = C12; 
+    D(1, 0) = C12; D(1, 1) = C11; 
+    D(2, 2) = C44;
 
-    double det_J = (dx / 2.0) * (dy / 2.0);
-    double pt = 1.0 / std::sqrt(3.0);
-    std::vector<std::pair<double, double>> gauss_points = {{-pt, -pt}, {pt, -pt}, {pt, pt}, {-pt, pt}};
+    // Constantes d'intégration de Gauss (4 points)
+    const double det_J = (dx / 2.0) * (dy / 2.0);
+    const double pt = 1.0 / std::sqrt(3.0);
+    const std::vector<std::pair<double, double>> gauss_points = {
+        {-pt, -pt}, {pt, -pt}, {pt, pt}, {-pt, pt}
+    };
 
-    std::vector<Quad> quads = m_mesh.Mesh_quads();
+    const std::vector<Quad>& quads = m_mesh.Mesh_quads();
 
-    // 2. Boucle sur les éléments pour intégrer la polarisation actuelle
-    for (size_t e = 0; e < quads.size(); ++e) {
-        const Quad& quad = quads[e];
-        int n1 = quad.n1 - 1; int n2 = quad.n2 - 1;
-        int n3 = quad.n3 - 1; int n4 = quad.n4 - 1;
+    // 3. Boucle sur les éléments : Calcul des forces d'électrostriction
+    for (const auto& quad : quads) {
+        int n1 = quad.n1 - 1; 
+        int n2 = quad.n2 - 1;
+        int n3 = quad.n3 - 1; 
+        int n4 = quad.n4 - 1;
 
-        std::vector<int> dof_indices = {2*n1, 2*n1+1, 2*n2, 2*n2+1, 2*n3, 2*n3+1, 2*n4, 2*n4+1};
+        // Utilisation de std::array (plus rapide que std::vector car allocation statique en mémoire)
+        std::array<int, 8> dof_indices = {
+            2*n1, 2*n1+1, 2*n2, 2*n2+1, 2*n3, 2*n3+1, 2*n4, 2*n4+1
+        };
 
-        // Extraction de la polarisation locale sur l'élément (SPATIALITÉ)
+        // Extraction de la polarisation locale sur les nœuds
         double px1 = Px[n1], py1 = Py[n1];
         double px2 = Px[n2], py2 = Py[n2];
         double px3 = Px[n3], py3 = Py[n3];
@@ -427,7 +482,8 @@ void PhaseFieldFerro::solve_mechanics() {
         Eigen::VectorXd Fe = Eigen::VectorXd::Zero(8);
 
         for (const auto& point : gauss_points) {
-            double xi = point.first; double eta = point.second;
+            double xi = point.first; 
+            double eta = point.second;
 
             // Fonctions de forme pour interpoler P au point de Gauss
             double N1 = 0.25 * (1.0 - xi) * (1.0 - eta);
@@ -438,32 +494,37 @@ void PhaseFieldFerro::solve_mechanics() {
             double P_x_gauss = N1*px1 + N2*px2 + N3*px3 + N4*px4;
             double P_y_gauss = N1*py1 + N2*py2 + N3*py3 + N4*py4;
 
-            // Vecteur de déformation propre (DYNAMIQUE)
+            // Vecteur de déformation propre (e0)
             Eigen::Vector3d e_0;
             e_0(0) = Q11 * P_x_gauss * P_x_gauss + Q12 * P_y_gauss * P_y_gauss;
             e_0(1) = Q12 * P_x_gauss * P_x_gauss + Q11 * P_y_gauss * P_y_gauss;
             e_0(2) = Q44 * P_x_gauss * P_y_gauss;
 
             Eigen::Matrix<double, 3, 8> B = get_B_matrix(xi, eta);
-            Fe += B.transpose() * D * e_0 * det_J;
+            
+            // OPTIMISATION EIGEN : 
+            // 1. Les parenthèses (D * e_0) forcent Eigen à multiplier un 3x3 avec un 3x1 d'abord (très rapide), 
+            //    puis de multiplier B^T avec le résultat.
+            // 2. noalias() empêche Eigen de créer une matrice temporaire inutile.
+            Fe.noalias() += B.transpose() * (D * e_0) * det_J;
         }
 
-        // Assemblage des forces
+        // Assemblage des forces dans le vecteur global
         for (int i = 0; i < 8; ++i) {
             F_global(dof_indices[i]) += Fe(i);
         }
     }
 
-    // Gestion du Dirichlet sur le vecteur force
+    // 4. Gestion de la méthode de pénalité pour les conditions de Dirichlet
     for (int i = 0; i < nx * ny; ++i) {
-        if (bc_ux[i].is_fixed) F_global(2*i) = bc_ux[i].value * 1e12;
-        if (bc_uy[i].is_fixed) F_global(2*i+1) = bc_uy[i].value * 1e12;
+        if (bc_ux[i].is_fixed) F_global(2*i)   = bc_ux[i].value * 1e30;
+        if (bc_uy[i].is_fixed) F_global(2*i+1) = bc_uy[i].value * 1e30;
     }
 
-    // 4. Résolution du système
+    // 5. Résolution du système linéaire
     U_global = mechanics_solver.solve(F_global);
 
-    // 5. Mise à jour des déplacements pour l'exportation
+    // 6. Mise à jour des déplacements pour l'exportation
     for (int i = 0; i < nx * ny; ++i) {
         ux[i] = U_global(2 * i);
         uy[i] = U_global(2 * i + 1);
@@ -471,51 +532,65 @@ void PhaseFieldFerro::solve_mechanics() {
 }
 
 void PhaseFieldFerro::compute_stresses() {
-    for (int j = 0; j < ny; ++j) {
-        for (int i = 0; i < nx; ++i) {
-            int idx = j * nx + i;
-            
-            // 1. Gradients de déplacement (Différences finies centrales)
-            double dux_dx = 0.0, duy_dy = 0.0, dux_dy = 0.0, duy_dx = 0.0;
-            
-            if (i == 0) {
-                dux_dx = (ux[idx + 1] - ux[idx]) / dx;
-                duy_dx = (uy[idx + 1] - uy[idx]) / dx;
-            } else if (i == nx - 1) {
-                dux_dx = (ux[idx] - ux[idx - 1]) / dx;
-                duy_dx = (uy[idx] - uy[idx - 1]) / dx;
-            } else {
-                dux_dx = (ux[idx + 1] - ux[idx - 1]) / (2.0 * dx);
-                duy_dx = (uy[idx + 1] - uy[idx - 1]) / (2.0 * dx);
-            }
+    // 1. Initialisation à zéro et création d'un compteur d'adjacence
+    std::fill(sig_xx.begin(), sig_xx.end(), 0.0);
+    std::fill(sig_yy.begin(), sig_yy.end(), 0.0);
+    std::fill(sig_xy.begin(), sig_xy.end(), 0.0);
+    std::vector<int> node_counts(nx * ny, 0);
 
-            if (j == 0) {
-                dux_dy = (ux[idx + nx] - ux[idx]) / dy;
-                duy_dy = (uy[idx + nx] - uy[idx]) / dy;
-            } else if (j == ny - 1) {
-                dux_dy = (ux[idx] - ux[idx - nx]) / dy;
-                duy_dy = (uy[idx] - uy[idx - nx]) / dy;
-            } else {
-                dux_dy = (ux[idx + nx] - ux[idx - nx]) / (2.0 * dy);
-                duy_dy = (uy[idx + nx] - uy[idx - nx]) / (2.0 * dy);
-            }
+    // Matrice d'élasticité
+    Eigen::Matrix<double, 3, 3> D = Eigen::Matrix<double, 3, 3>::Zero();
+    D(0, 0) = C11; D(0, 1) = C12; D(1, 0) = C12; D(1, 1) = C11; D(2, 2) = C44;
 
-            // 2. Déformation totale (Ingénieur gamma pour le cisaillement)
-            double eps_xx = dux_dx;
-            double eps_yy = duy_dy;
-            double gamma_xy = dux_dy + duy_dx; 
+    // La matrice B évaluée exactement au CENTRE de l'élément (xi = 0, eta = 0)
+    Eigen::Matrix<double, 3, 8> B_center = get_B_matrix(0.0, 0.0);
+    
+    std::vector<Quad> quads = m_mesh.Mesh_quads();
 
-            // 3. Déformation spontanée
-            double px = Px[idx]; 
-            double py = Py[idx];
-            double eps0_xx = Q11 * px * px + Q12 * py * py;
-            double eps0_yy = Q12 * px * px + Q11 * py * py;
-            double gamma0_xy = Q44 * px * py; 
+    // 2. Boucle sur les ÉLÉMENTS (et non plus sur les nœuds)
+    for (const auto& quad : quads) {
+        int n1 = quad.n1 - 1;
+        int n2 = quad.n2 - 1;
+        int n3 = quad.n3 - 1;
+        int n4 = quad.n4 - 1;
 
-            // 4. Contraintes via Loi de Hooke
-            sig_xx[idx] = C11 * (eps_xx - eps0_xx) + C12 * (eps_yy - eps0_yy);
-            sig_yy[idx] = C12 * (eps_xx - eps0_xx) + C11 * (eps_yy - eps0_yy);
-            sig_xy[idx] = C44 * (gamma_xy - gamma0_xy);
+        // Extraction des déplacements de cet élément
+        Eigen::VectorXd Ue(8);
+        Ue << ux[n1], uy[n1], ux[n2], uy[n2],
+              ux[n3], uy[n3], ux[n4], uy[n4];
+
+        // Calcul exact de la déformation totale au centre
+        Eigen::Vector3d eps_tot = B_center * Ue;
+
+        // Interpolation de la polarisation au centre de l'élément
+        double px_c = 0.25 * (Px[n1] + Px[n2] + Px[n3] + Px[n4]);
+        double py_c = 0.25 * (Py[n1] + Py[n2] + Py[n3] + Py[n4]);
+
+        // Déformation propre (Électrostriction)
+        Eigen::Vector3d eps_0;
+        eps_0(0) = Q11 * px_c * px_c + Q12 * py_c * py_c;
+        eps_0(1) = Q12 * px_c * px_c + Q11 * py_c * py_c;
+        eps_0(2) = Q44 * px_c * py_c;
+
+        // Contrainte constante au centre de l'élément via la Loi de Hooke
+        Eigen::Vector3d sig_elem = D * (eps_tot - eps_0);
+
+        // 3. Distribution de la contrainte aux 4 nœuds
+        std::vector<int> nodes = {n1, n2, n3, n4};
+        for (int n : nodes) {
+            sig_xx[n] += sig_elem(0);
+            sig_yy[n] += sig_elem(1);
+            sig_xy[n] += sig_elem(2);
+            node_counts[n]++;
+        }
+    }
+
+    // 4. Lissage final (On moyenne par le nombre d'éléments qui touchent chaque nœud)
+    for (int i = 0; i < nx * ny; ++i) {
+        if (node_counts[i] > 0) {
+            sig_xx[i] /= node_counts[i];
+            sig_yy[i] /= node_counts[i];
+            sig_xy[i] /= node_counts[i];
         }
     }
 }
@@ -542,25 +617,32 @@ void PhaseFieldFerro::compute_electric_field() {
 }
 
 double PhaseFieldFerro::compute_one_step() {
+    double max_delta = 0.0; 
 
     if (m_enable_electrostatics) {
         solve_electrostatics();
         compute_electric_field();
-    }
-    else {
+    } else {
         std::fill(Ex.begin(), Ex.end(), 0.0);
         std::fill(Ey.begin(), Ey.end(), 0.0);
     }
 
     if (m_enable_mecanics) {
         solve_mechanics();
+        compute_stresses(); 
     }
 
     if (m_enable_fracture) {
         solve_fracture();
     }
 
-    return update_polarization();
+    if (m_enable_thermodynamics) {
+        max_delta = update_polarization();
+    } else {
+        max_delta = 0.0; 
+    }
+
+    return max_delta;
 }
 
 double PhaseFieldFerro::update_polarization() {

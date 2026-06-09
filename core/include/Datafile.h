@@ -1,21 +1,19 @@
 #pragma once
 #include <string>
+#include <iostream>
 #include "toml.hpp"
 
 template <typename T>
-T get_val(const toml::value& config, const std::string& section, const std::string& key, T default_value) {
-    if (config.contains(section) && config.at(section).is_table()) {
-        const auto& table = config.at(section);        
-        if (table.contains(key)) {
-            return toml::find<T>(table, key);
-        }
+T get_val(const toml::table& config, const std::string& section, const std::string& key, T default_value) {
+    if (auto node = config[section][key]) {
+        return node.value<T>().value_or(default_value);
     }
     return default_value;
 }
 
 class Datafile {
 private:
-    toml::value m_config;
+    toml::table m_config; 
 
 public:
     Datafile(const std::string& filename);
@@ -58,9 +56,12 @@ public:
     int get_save_frequency() const { return get_val<int>(m_config, "simulation", "save_frequency_P", 50); }
     double get_tolerance() const { return get_val<double>(m_config, "simulation", "tolerance_P", 1e-6); }
     bool calcul_mesh() const { return get_val<bool>(m_config, "io", "calcul_mesh", true); }
-    bool enable_electrostatics() const { return get_val<bool>(m_config, "physics", "enable_electrostatics", true); }
+
+    bool enable_thermodynamics() const { return get_val<bool>(m_config, "physics", "enable_thermodynamics", true); }
+    bool enable_electrostatics() const { return get_val<bool>(m_config, "physics", "enable_electrostatics", false); }
     bool enable_mecanics() const { return get_val<bool>(m_config, "physics", "enable_mecanics", false); }
     bool enable_fracture() const { return get_val<bool>(m_config, "physics", "enable_fracture", false); }
+
     double get_Q11() const { return get_val<double>(m_config, "physics", "Q11", 0.0); }
     double get_Q12() const { return get_val<double>(m_config, "physics", "Q12", 0.0); }
     double get_Q44() const { return get_val<double>(m_config, "physics", "Q44", 0.0); }
@@ -75,7 +76,20 @@ public:
     bool enable_validation_mecanique() const { return get_val<bool>(m_config, "validation", "enable_validation_mecanique", false); }
     bool enable_validation_fracture() const { return get_val<bool>(m_config, "validation", "enable_validation_fracture", false); }
 
-    // --- Paramètres des conditions aux limites () ---
+    // --- Paramètres des conditions aux limites Electrostatiques ---
+    bool get_fix_bottom_phi() const { return get_val<bool>(m_config, "electrostatics_bcs", "fix_bottom_phi", false); }
+    double get_bc_value_bottom_phi() const { return get_val<double>(m_config, "electrostatics_bcs", "value_bottom_phi", 0.0); }
+    
+    bool get_fix_top_phi() const { return get_val<bool>(m_config, "electrostatics_bcs", "fix_top_phi", false); }
+    double get_bc_value_top_phi() const { return get_val<double>(m_config, "electrostatics_bcs", "value_top_phi", 0.0); }
+    
+    bool get_fix_left_phi() const { return get_val<bool>(m_config, "electrostatics_bcs", "fix_left_phi", false); }
+    double get_bc_value_left_phi() const { return get_val<double>(m_config, "electrostatics_bcs", "value_left_phi", 0.0); }
+    
+    bool get_fix_right_phi() const { return get_val<bool>(m_config, "electrostatics_bcs", "fix_right_phi", false); }
+    double get_bc_value_right_phi() const { return get_val<double>(m_config, "electrostatics_bcs", "value_right_phi", 0.0); }
+
+    // --- Paramètres des conditions aux limites Mecaniques ---
     bool enable_dirichlet_x() const { return get_val<bool>(m_config, "boundary_conditions", "enable_dirichlet_x", false); }
     bool enable_dirichlet_y() const { return get_val<bool>(m_config, "boundary_conditions", "enable_dirichlet_y", false); }
     double dirichlet_value_left() const { return get_val<double>(m_config, "boundary_conditions", "dirichlet_left_value", 0.0); }
@@ -102,4 +116,6 @@ public:
     double get_bc_value_right_x() const { return get_val<double>(m_config, "mechanics_bcs", "value_right_x", 0.0); }
     bool get_fix_right_y() const { return get_val<bool>(m_config, "mechanics_bcs", "fix_right_y", false); }
     double get_bc_value_right_y() const { return get_val<double>(m_config, "mechanics_bcs", "value_right_y", 0.0); }
+
+
 };

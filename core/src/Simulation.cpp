@@ -35,16 +35,18 @@ void Simulation::save_current_state() {
     std::vector<double> U_combined;
     std::vector<double> phi_vec;
 
-    // --- 1. Export de la Polarisation (Toujours actif) ---
-    const auto& px_data = m_physics.get_Px();
-    const auto& py_data = m_physics.get_Py();
-    P_combined.reserve(px_data.size() * 2); 
-    for(size_t i = 0; i < px_data.size(); ++i) {
-        P_combined.push_back(px_data[i]);
-        P_combined.push_back(py_data[i]);
+    // --- 1. Export de la Polarisation (Conditionnel) ---
+    if (m_physics.is_thermodynamics_enabled()) {
+        const auto& px_data = m_physics.get_Px();
+        const auto& py_data = m_physics.get_Py();
+        P_combined.reserve(px_data.size() * 2); 
+        for(size_t i = 0; i < px_data.size(); ++i) {
+            P_combined.push_back(px_data[i]);
+            P_combined.push_back(py_data[i]);
+        }
+        vector_names.push_back("Polarisation");
+        vector_data.push_back(&P_combined);
     }
-    vector_names.push_back("Polarisation");
-    vector_data.push_back(&P_combined);
 
     // --- 2. Export de l'Électrostatique (Conditionnel) ---
     if (m_physics.is_electrostatics_enabled()) {

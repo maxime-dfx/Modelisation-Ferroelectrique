@@ -1,14 +1,12 @@
 #include "Datafile.h"
-#include <stdexcept>
-#include <iostream>
+#include "Logger.h" 
 
-using namespace std;
-
-Datafile::Datafile(const string& filename) {
+Datafile::Datafile(const std::string& filename) {
     try {
-        m_config = toml::parse(filename);
-    } catch (const std::exception& err) {
-        throw runtime_error(string("Echec lecture configuration '") + filename + "' : " + err.what());
+        m_config = toml::parse_file(filename);
+    } catch (const toml::parse_error& err) {
+        Logger::error("Erreur lors de la lecture du fichier TOML : " + std::string(err.what()));
+        exit(1);
     }
 }
 

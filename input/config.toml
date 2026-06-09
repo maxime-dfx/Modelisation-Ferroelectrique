@@ -30,6 +30,7 @@ epsilon_0 = 0.131
 epsilon_r = 1.0
 dt = 0.01
 
+enable_thermodynamics = true
 enable_electrostatics = true
 enable_mecanics = true
 enable_fracture = false
@@ -46,12 +47,13 @@ Q44 = 0.059
 
 [simulation]
 max_steps_P = 2000
-save_frequency_P = 100
+save_frequency_P = 1
 tolerance_P = 1e-6
 
 [validation]
 enable_validation_thermodynamique = false
 enable_validation_electrostatique = false
+enable_validation_mecanique = false
 
 [boundary_conditions]
 enable_dirichlet_x = false
@@ -62,8 +64,18 @@ dirichlet_right_value = 0.570553
 dirichlet_top_value = 0.0
 dirichlet_bottom_value = 0.0
 
+[electrostatics_bcs]
+fix_bottom_phi = true
+value_bottom_phi = 0.0
+fix_top_phi = true
+value_top_phi = 100.0 
+fix_left_phi = true
+value_left_phi = 100.0
+fix_right_phi = true
+value_right_phi = 0.0
+
 [mechanics_bcs]
-fix_bottom_x = true
+fix_bottom_x = false
 value_bottom_x = 0.0
 fix_bottom_y = true
 value_bottom_y = 0.0
@@ -71,7 +83,7 @@ value_bottom_y = 0.0
 fix_top_x = false
 value_top_x = 0.0
 fix_top_y = false
-value_top_y = 5.0
+value_top_y = 0.0
 
 
 fix_left_x = false
@@ -79,7 +91,7 @@ value_left_x = 0.0
 fix_left_y = false
 value_left_y = 0.0
 
-fix_right_x = false
+fix_right_x = true
 value_right_x = 0.0
 fix_right_y = false
 value_right_y = 0.0

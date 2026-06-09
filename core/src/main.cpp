@@ -69,11 +69,11 @@ int main() {
             Logger::time("[Polarization Chrono] Simulation & Export", chrono_etape.elapsed_ms());
         }
 
-        if (config.enable_validation_thermo() || config.enable_validation_electrostatique() || config.enable_validation_fracture()) {
-            Validation validation;
+        if (config.enable_validation_thermo() || config.enable_validation_electrostatique() || config.enable_validation_mecanique() || config.enable_validation_fracture()) {
             if(config.get_chrono_validation()) chrono_etape.start();
 
-            validation.run_all_validations(config, msh, physics, exporter);
+            Validation validation(config, msh, physics, exporter);
+            validation.run_all_validations();
                 
             if(config.get_chrono_validation()) {
                 chrono_etape.stop();

@@ -16,7 +16,6 @@ private:
     double L, alpha, beta, gamma, G, epsilon_0, epsilon_r, dt, dx, dy;
     int nx, ny; 
     std::vector<double> Px, Px_new, Py, Py_new;
-    std::vector<double> phi, rho;
     std::vector<double> Ex, Ey;
 
     Eigen::SparseMatrix<double> A_laplacian; // Matrice de diffusion
@@ -26,6 +25,7 @@ private:
     Eigen::SimplicialLDLT<Eigen::SparseMatrix<double>> poisson_solver; // Solveur pour la diffusion
     Eigen::SparseLU<Eigen::SparseMatrix<double>> imex_solver; // Solveur pour le schéma IMEX
 
+    bool m_enable_thermodynamics; // Activer ou désactiver la contribution thermodynamique
     bool m_enable_electrostatics; // Activer ou désactiver la contribution électrostatique
     bool m_enable_mecanics; // Activer ou désactiver la contribution mécanique
     bool m_enable_fracture; // Activer ou désactiver la contribution de la fracture
@@ -43,19 +43,16 @@ private:
 
     // --- Variables Mécaniques ---
     std::vector<double> ux, uy; // Déplacements nodaux
-    
-    // Contraintes pour l'exportation (calculées au centre des éléments ou aux nœuds)
-    std::vector<double> sig_xx, sig_yy, sig_xy; 
+    std::vector<double> sig_xx, sig_yy, sig_xy; // Composantes de la contrainte
 
     // --- Matrices et Solveurs Mécaniques ---
     Eigen::SparseMatrix<double> K_global; // Matrice de rigidité globale (2N x 2N)
     Eigen::VectorXd F_global;             // Vecteur des forces globales (2N)
     Eigen::VectorXd U_global;             // Solution des déplacements (2N)
     
-    // La matrice de rigidité élastique est Symétrique Définie Positive (SDP), 
-    // on utilise donc le solveur Cholesky (LDLT) ultra-rapide.
     Eigen::SimplicialLDLT<Eigen::SparseMatrix<double>> mechanics_solver; 
 
+    std::vector<DofConstraint> bc_phi; // CL pour le potentiel
     std::vector<DofConstraint> bc_ux; // CL pour u_x
     std::vector<DofConstraint> bc_uy; // CL pour u_y
 
@@ -75,8 +72,10 @@ private:
     double update_polarization();
     void apply_dirichlet_conditions(Eigen::VectorXd& b);
 
+    void init_electrostatics_bcs();
+    bool fix_bottom, fix_top, fix_left, fix_right;
+    double val_bottom, val_top, val_left, val_right;
     void init_mechanical_bcs();
-    std::vector<bool> is_fixed_ux, is_fixed_uy;
     bool bottom_x_fixed, bottom_y_fixed;
     bool top_x_fixed, top_y_fixed;
     bool left_x_fixed, left_y_fixed;
@@ -85,6 +84,7 @@ private:
     double top_x_value,    top_y_value;
     double left_x_value,   left_y_value;
     double right_x_value,  right_y_value;
+
 
 
 public:
@@ -105,8 +105,9 @@ public:
 
     double compute_one_step();
 
-    // Dans la section public: de PhaseFieldFerro.h
+    bool is_thermodynamics_enabled() const { return m_enable_thermodynamics; }
     bool is_mechanics_enabled() const { return m_enable_mecanics; }
+
     
     const std::vector<double>& get_ux() const { return ux; }
     const std::vector<double>& get_uy() const { return uy; }
